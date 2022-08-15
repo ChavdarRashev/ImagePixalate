@@ -2,7 +2,42 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+<canvas id="can"></canvas>
+
+<div>
+    <img src="500.jpg" />
 </div>
+
+<style>
+    #can {
+        border: 1px solid black;
+    }
+</style>
+
+@section Scripts {
+
+    <script>
+
+        const canvas = document.getElementById('can');
+        const ctx = canvas.getContext('2d');
+
+        const img = new Image();   // Create new img element
+        img.src = '500.jpg'; // Set source path
+
+        img.addEventListener('load', () => {
+            ctx.drawImage(img, 69, 50);
+        }, false);
+
+
+        $(document).ready(function () {
+
+            
+
+        })
+
+     //https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_usage
+        //https://www.html5canvastutorials.com/tutorials/html5-canvas-images/
+    </script>
+
+}
