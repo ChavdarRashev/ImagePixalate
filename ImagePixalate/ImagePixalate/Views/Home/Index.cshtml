@@ -19,16 +19,28 @@
 
     <script>
 
-        const canvas = document.getElementById('can');
-        const ctx = canvas.getContext('2d');
-
         const img = new Image();   // Create new img element
         img.src = '500.jpg'; // Set source path
 
-        img.addEventListener('load', () => {
-            ctx.drawImage(img, 69, 50);
-        }, false);
+       
+            
+            
+     
 
+        
+        window.addEventListener('load', (event) => {
+            console.log('page is fully loaded');
+
+           
+                const canvas = document.getElementById('can');
+                const ctx = canvas.getContext('2d')
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+                ctx.fillRect(50, 50, 100, 100)
+           
+
+        });
 
         $(document).ready(function () {
 
@@ -37,7 +49,7 @@
         })
 
      //https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_usage
-        //https://www.html5canvastutorials.com/tutorials/html5-canvas-images/
+     //https://www.html5canvastutorials.com/tutorials/html5-canvas-images/
     </script>
 
 }
