@@ -9,6 +9,16 @@
     <img src="500.jpg" />
 </div>
 
+<form asp-action="NewImg" enctype="multipart/form-data" method="post" id="fileForm">
+
+    
+    <input type="file" id="postFile" name="postFile" style="display:none">
+
+    
+    <input type="button" id="buttonSubmit" name="btnTest" class="btn btn-primary" value=" Save the image " />
+    
+</form>
+
 <style>
     #can {
         border: 1px solid black;
@@ -22,31 +32,45 @@
         const img = new Image();   // Create new img element
         img.src = '500.jpg'; // Set source path
 
+        const button = document.getElementById('buttonSubmit');
        
-            
-            
-     
-
         
         window.addEventListener('load', (event) => {
-            console.log('page is fully loaded');
-
            
                 const canvas = document.getElementById('can');
                 const ctx = canvas.getContext('2d')
+
                 canvas.width = img.width;
                 canvas.height = img.height;
+
                 ctx.drawImage(img, 0, 0);
                 ctx.fillRect(50, 50, 100, 100)
-           
+
+
+            const fullQuality = canvas.toDataURL('image/jpeg', 1.0); //Convert canvas image to URL format (base64) with full quality jpeg  https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
+            // "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ…9oADAMBAAIRAxEAPwD/AD/6AP/Z"
+            var imageBase64 = fullQuality.replace('data:image/png;base64,', '');
+            imageBase64 = "kaval";
+            button.addEventListener('click', (event) => {
+                const fileInput = document.querySelector('input[type="file"]');
+                // Create a new File object
+                const postFile = new File(imageBase64, 'postFile.txt', {
+                    type: 'text/plain',
+                    lastModified: new Date(),
+                });
+                // Now let's create a DataTransfer to get a FileList
+                const dataTransfer = new DataTransfer();
+                dataTransfer.items.add(postFile);
+                fileInput.files = dataTransfer.files;
+                var size = fileInput.files[0].size;
+
+                document.getElementById('fileForm').submit();
+            });
+                     
 
         });
 
-        $(document).ready(function () {
-
-            
-
-        })
+      
 
      //https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_usage
      //https://www.html5canvastutorials.com/tutorials/html5-canvas-images/
