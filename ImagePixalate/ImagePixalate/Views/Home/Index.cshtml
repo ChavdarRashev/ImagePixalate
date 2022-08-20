@@ -3,25 +3,33 @@
 }
 
 
-<canvas id="can"></canvas>
-
-<div>
-    <img src="500.jpg" />
-</div>
-
 <form asp-action="NewImg" enctype="multipart/form-data" method="post" id="fileForm">
 
-    
+
     <input type="file" id="postFile" name="postFile" style="display:none">
 
-    
+
     <input type="button" id="buttonSubmit" name="btnTest" class="btn btn-primary" value=" Save the image " />
-    
+
 </form>
 
+
+<div id="canvasWrapper">
+    
+    <canvas id="canvas"></canvas>
+</div>
+
+
+
+
 <style>
-    #can {
-        border: 1px solid black;
+    canvas {
+        border: 1px solid red;
+        position: absolute;
+    }
+
+    #canvasWrapper {
+        position: relative;
     }
 </style>
 
@@ -37,38 +45,152 @@
             const buf = await res.arrayBuffer();
             return new File([buf], filename, { type: mimeType });
         };
+        // https://stackoverflow.com/questions/33040703/proper-use-of-const-for-defining-functions
+        //https://thewebdev.info/2022/05/07/how-to-convert-base64-string-to-javascript-file-object-like-as-from-file-input-form/
 
         const button = document.getElementById('buttonSubmit');
        
         
         window.addEventListener('load', (event) => {
            
-                const canvas = document.getElementById('can');
-                const ctx = canvas.getContext('2d')
+                const canvas = document.getElementById('canvas');
+                
+                var ctx = canvas.getContext("2d");
+               
 
                 canvas.width = img.width;
                 canvas.height = img.height;
 
-                ctx.drawImage(img, 0, 0);
-                ctx.fillRect(50, 50, 100, 100)
+                ctx.drawImage(img, 0, 0)
 
 
-            const fullQuality = canvas.toDataURL('image/jpeg', 1.0); //Convert canvas image to URL format (base64) with full quality jpeg  https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
-            // "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ…9oADAMBAAIRAxEAPwD/AD/6AP/Z"
-            var imageBase64 = fullQuality.replace('data:image/png;base64,', '');
+            // style the context
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = 3;
+           
+
+            // calculate where the canvas is on the window
+            // (used to help calculate mouseX/mouseY)
+            var $canvas = $("#canvas");
+            var canvasOffset = $canvas.offset();
+            var offsetX = canvasOffset.left;
+            var offsetY = canvasOffset.top;
+            var scrollX = $canvas.scrollLeft();
+            var scrollY = $canvas.scrollTop();
+
+            // this flage is true when the user is dragging the mouse
+            var isDown = false;
+
+            // these vars will hold the starting mouse position
+            var startX;
+            var startY;
+
+            var prevStartX = 0;
+            var prevStartY = 0;
+
+            var prevWidth = 0;
+            var prevHeight = 0;
+
+            //ctx.fillRect(50, 50, 100, 100)
+
+            function handleMouseDown(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // save the starting x/y of the rectangle
+                startX = parseInt(e.clientX - offsetX);
+                startY = parseInt(e.clientY - offsetY);
+
+                // set a flag indicating the drag has begun
+                isDown = true;
+            }
+
+            function handleMouseUp(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // the drag is over, clear the dragging flag
+                isDown = false;
+               // ctx.fillRect(prevStartX, prevStartY, prevWidth, prevHeight);
+                
+            }
+
+            function handleMouseOut(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // the drag is over, clear the dragging flag
+                isDown = false;
+            }
+
+            function handleMouseMove(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // if we're not dragging, just return
+                if (!isDown) {
+                    return;
+                }
+
+                // get the current mouse position
+                mouseX = parseInt(e.clientX - offsetX);
+                mouseY = parseInt(e.clientY - offsetY);
+
+                // Put your mousemove stuff here
+
+
+
+                // calculate the rectangle width/height based
+                // on starting vs current mouse position
+                var width = mouseX - startX;
+                var height = mouseY - startY;
+
+                // clear the canvas
+                //ctx.clearRect(0, 0, canvas.width, canvas.height);
+                //ctx.drawImage(img, 0, 0)
+
+                // draw a new rect from the start position 
+                // to the current mouse position
+                ctx.fillRect(startX, startY, width, height);
+
+                prevStartX = startX;
+                prevStartY = startY;
+
+                prevWidth = width;
+                prevHeight = height;
+            }
+
+            // listen for mouse events
+            $("#canvas").mousedown(function (e) {
+                handleMouseDown(e);
+            });
+            $("#canvas").mousemove(function (e) {
+                handleMouseMove(e);
+            });
+            $("#canvas").mouseup(function (e) {
+                handleMouseUp(e);
+            });
+
+            $("#canvas").mouseout(function (e) {
+                handleMouseOut(e);
+            });
+
+
+
+
+
             
             button.addEventListener('click', (event) => {
 
                 
+                //Save new drаwn image
+                const fullQuality = canvas.toDataURL('image/jpeg', 1.0); //Convert canvas image to URL format (base64) with full quality jpeg  https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
+                // "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ…9oADAMBAAIRAxEAPwD/AD/6AP/Z"
+                var imageBase64 = fullQuality.replace('data:image/png;base64,', '');
+
+
                 const fileInput = document.querySelector('input[type="file"]');
                 
-
-                /*
-                const postFile = new File(imageBase64, 'postFile.txt', {
-                    type: 'text/plain',
-                    lastModified: new Date(),
-                });
-                */
 
                 
                 (async () => {
