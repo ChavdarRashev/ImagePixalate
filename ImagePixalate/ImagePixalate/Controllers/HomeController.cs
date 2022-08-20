@@ -35,33 +35,20 @@ namespace ImagePixalate.Controllers
         [HttpPost]
         public async Task<IActionResult> NewImg(IFormFile postFile)
         {
-            var result = new StringBuilder();
-            //Изчитаме подписания файл, като стринг
-            using (var reader = new StreamReader(postFile.OpenReadStream()))
+      
+
+            if (postFile.Length > 0)
             {
-                while (reader.Peek() >= 0)
-                    result.AppendLine(await reader.ReadLineAsync());
-            }
-
-            string fileString = result.ToString();
-
-
-            string fileName = "NewFile.jpg";
-            string fileNameWitPath = "wwwroot/"+ fileName;
-
-            using (FileStream fs = new FileStream(fileNameWitPath, FileMode.Create))
-            {
-                using (BinaryWriter bw = new BinaryWriter(fs))
+                
+                string fileName = "NewFile.jpg";
+                string fileNameWitPath = "wwwroot/" + fileName;
+                using (Stream fileStream = new FileStream(fileNameWitPath, FileMode.Create))
                 {
-                    byte[] data = Convert.FromBase64String(fileString);
-                    bw.Write(data);
-                    bw.Close();
+                    await postFile.CopyToAsync(fileStream);
                 }
-                fs.Close();
             }
 
 
-           
 
             return RedirectToAction(nameof(New));
             
