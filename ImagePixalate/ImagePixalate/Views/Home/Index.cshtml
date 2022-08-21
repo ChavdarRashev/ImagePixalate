@@ -3,6 +3,13 @@
 }
 
 
+
+<button onClick="window.location.reload();" id="clear" class="btn btn-secondary">Clear the image</button>
+
+<div id="wraper"> 
+    <canvas id="canvas"></canvas>
+</div>
+
 <form asp-action="NewImg" enctype="multipart/form-data" method="post" id="fileForm">
 
 
@@ -14,23 +21,26 @@
 </form>
 
 
-<div id="canvasWrapper">
-    
-    <canvas id="canvas"></canvas>
-</div>
 
 
-
-
-<style>
+<style>   
     canvas {
-        border: 1px solid red;
-        position: absolute;
+        border: 1px solid #cccccc;
     }
 
-    #canvasWrapper {
-        position: relative;
+    #wraper{
+        margin: 20px 0 0 0;
     }
+
+    #fileForm {
+        margin: 20px 0 0 0;
+    }
+
+    #clear {
+        margin: 20px 0 0 0;
+    }
+
+    
 </style>
 
 @section Scripts {
@@ -40,43 +50,37 @@
         const img = new Image();   // Create new img element
         img.src = '500.jpg'; // Set source path
 
+        //Anonymous function base64 url to JavaScript File Object
         const urlToFile = async (url, filename, mimeType) => {
             const res = await fetch(url);
             const buf = await res.arrayBuffer();
             return new File([buf], filename, { type: mimeType });
         };
-        // https://stackoverflow.com/questions/33040703/proper-use-of-const-for-defining-functions
-        //https://thewebdev.info/2022/05/07/how-to-convert-base64-string-to-javascript-file-object-like-as-from-file-input-form/
-
+        
         const button = document.getElementById('buttonSubmit');
        
-        
+        //http://jsfiddle.net/xkmqz9ho/
         window.addEventListener('load', (event) => {
            
-                const canvas = document.getElementById('canvas');
-                
-                var ctx = canvas.getContext("2d");
-               
+             const canvas = document.getElementById('canvas');                
+             var ctx = canvas.getContext("2d");
 
-                canvas.width = img.width;
-                canvas.height = img.height;
+            //Dynamically set the width and height of canvas based of the width and height of image
+            canvas.width = img.width;
+            canvas.height = img.height;
 
-                ctx.drawImage(img, 0, 0)
+            //Set image in the canvas
+            ctx.drawImage(img, 0, 0)
 
-
-            // style the context
-            ctx.strokeStyle = "blue";
-            ctx.lineWidth = 3;
-           
 
             // calculate where the canvas is on the window
             // (used to help calculate mouseX/mouseY)
-            var $canvas = $("#canvas");
-            var canvasOffset = $canvas.offset();
+            var _canvas = $("#canvas");      //jquery selector
+            var canvasOffset = _canvas.offset();
             var offsetX = canvasOffset.left;
             var offsetY = canvasOffset.top;
-            var scrollX = $canvas.scrollLeft();
-            var scrollY = $canvas.scrollTop();
+            var scrollX = _canvas.scrollLeft();
+            var scrollY = _canvas.scrollTop();
 
             // this flage is true when the user is dragging the mouse
             var isDown = false;
@@ -91,7 +95,23 @@
             var prevWidth = 0;
             var prevHeight = 0;
 
-            //ctx.fillRect(50, 50, 100, 100)
+            //Color of fiil rectangle
+            ctx.fillStyle = "#FFFFFF";
+
+           
+            // listen for mouse events
+            $("#canvas").mousedown(function (e) {
+                handleMouseDown(e);
+            });
+            $("#canvas").mousemove(function (e) {
+                handleMouseMove(e);
+            });
+            $("#canvas").mouseup(function (e) {
+                handleMouseUp(e);
+            });
+            $("#canvas").mouseout(function (e) {
+                handleMouseOut(e);
+            });
 
             function handleMouseDown(e) {
                 e.preventDefault();
@@ -111,8 +131,6 @@
 
                 // the drag is over, clear the dragging flag
                 isDown = false;
-               // ctx.fillRect(prevStartX, prevStartY, prevWidth, prevHeight);
-                
             }
 
             function handleMouseOut(e) {
@@ -137,17 +155,12 @@
                 mouseY = parseInt(e.clientY - offsetY);
 
                 // Put your mousemove stuff here
-
-
-
                 // calculate the rectangle width/height based
                 // on starting vs current mouse position
                 var width = mouseX - startX;
                 var height = mouseY - startY;
 
-                // clear the canvas
-                //ctx.clearRect(0, 0, canvas.width, canvas.height);
-                //ctx.drawImage(img, 0, 0)
+
 
                 // draw a new rect from the start position 
                 // to the current mouse position
@@ -160,29 +173,9 @@
                 prevHeight = height;
             }
 
-            // listen for mouse events
-            $("#canvas").mousedown(function (e) {
-                handleMouseDown(e);
-            });
-            $("#canvas").mousemove(function (e) {
-                handleMouseMove(e);
-            });
-            $("#canvas").mouseup(function (e) {
-                handleMouseUp(e);
-            });
-
-            $("#canvas").mouseout(function (e) {
-                handleMouseOut(e);
-            });
-
-
-
-
-
             
             button.addEventListener('click', (event) => {
-
-                
+              
                 //Save new drаwn image
                 const fullQuality = canvas.toDataURL('image/jpeg', 1.0); //Convert canvas image to URL format (base64) with full quality jpeg  https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL
                 // "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQ…9oADAMBAAIRAxEAPwD/AD/6AP/Z"
@@ -214,15 +207,70 @@
                 })();
 
                 
-            });
-                     
+            });                     
 
         });
 
-      
+        function handleMouseDown(e) {
+            e.preventDefault();
+            e.stopPropagation();
 
-     //https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API/Tutorial/Basic_usage
-     //https://www.html5canvastutorials.com/tutorials/html5-canvas-images/
+            // save the starting x/y of the rectangle
+            startX = parseInt(e.clientX - offsetX);
+            startY = parseInt(e.clientY - offsetY);
+
+            // set a flag indicating the drag has begun
+            isDown = true;
+        }
+
+        function handleMouseUp(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // the drag is over, clear the dragging flag
+            isDown = false;
+        }
+
+        function handleMouseOut(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // the drag is over, clear the dragging flag
+            isDown = false;
+        }
+
+        function handleMouseMove(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // if we're not dragging, just return
+            if (!isDown) {
+                return;
+            }
+
+            // get the current mouse position
+            mouseX = parseInt(e.clientX - offsetX);
+            mouseY = parseInt(e.clientY - offsetY);
+
+            // Put your mousemove stuff here
+            // calculate the rectangle width/height based
+            // on starting vs current mouse position
+            var width = mouseX - startX;
+            var height = mouseY - startY;
+
+
+
+            // draw a new rect from the start position 
+            // to the current mouse position
+            ctx.fillRect(startX, startY, width, height);
+
+            prevStartX = startX;
+            prevStartY = startY;
+
+            prevWidth = width;
+            prevHeight = height;
+        }
+
     </script>
 
 }
